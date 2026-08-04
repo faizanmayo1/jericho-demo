@@ -1,0 +1,212 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-canvas text-ink font-body;
+    /* The page body must never scroll horizontally. Wide content, above all the
+       cross-level timeline spine, scrolls inside its own container instead. */
+    overflow-x: hidden;
+  }
+
+  /* Census counts, HPRD figures, bed numbers and dose times all have to align in
+     columns. We never reach for a monospace face (standing build rule), so
+     lining tabular figures do that job. */
+  .tnum {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: 'tnum' 1, 'lnum' 1;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+    letter-spacing: -0.008em;
+  }
+}
+
+@layer components {
+  /* -------------------------------------------------------------------- *
+   * Page ground. Light falls from above and a very fine grain sits over
+   * everything, so the canvas reads as a surface rather than as an empty
+   * div. The grain is at 2.5 percent, which is below the level anybody
+   * consciously notices and above the level at which a large flat colour
+   * starts to look like unpainted software.
+   * -------------------------------------------------------------------- */
+  .light-ground {
+    position: relative;
+    /* Light falls from above, but only just. An earlier version washed this to
+       near white across the top third, which bleached out the canvas tint at
+       exactly the point the eye lands and left the page looking colourless. */
+    background-image:
+      linear-gradient(to bottom, rgba(255, 252, 254, 0.42) 0%, rgba(255, 252, 254, 0) 26%),
+      radial-gradient(110% 44% at 50% -12%, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 58%);
+  }
+
+  .light-ground::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* -------------------------------------------------------------------- *
+   * THE SIGNATURE. A ruled ledger margin.
+   *
+   * The product's whole claim is that the record is the page and the layer
+   * writes in the margin. On the one document that carries the argument,
+   * that stops being content and becomes structure: a plum hairline set in
+   * from the left edge, section headings sitting outside it in the margin,
+   * and everything Almanac contributed hanging into that same column.
+   *
+   * It appears at large sizes only. On a phone a ruled margin is just lost
+   * width, so the page falls back to a single column and loses nothing.
+   * -------------------------------------------------------------------- */
+  .ledger {
+    position: relative;
+  }
+
+  @media (min-width: 1024px) {
+    .ledger::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 154px;
+      width: 1px;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        transparent 0,
+        rgba(110, 33, 80, 0.26) 3%,
+        rgba(110, 33, 80, 0.26) 97%,
+        transparent 100%
+      );
+    }
+
+    .ledger-row {
+      display: grid;
+      grid-template-columns: 104px 1fr;
+      column-gap: 36px;
+    }
+  }
+
+  /* -------------------------------------------------------------------- *
+   * Dusk. The one dark surface: the masthead, and the boards that represent
+   * the hours before the stand-up. Lit faintly from the Almanac side.
+   * -------------------------------------------------------------------- */
+  .dusk-ground {
+    background-color: #271327;
+    background-image:
+      radial-gradient(72% 140% at 8% 0%, rgba(200, 136, 169, 0.24) 0%, rgba(200, 136, 169, 0) 64%),
+      radial-gradient(58% 130% at 86% 4%, rgba(31, 99, 238, 0.20) 0%, rgba(31, 99, 238, 0) 62%);
+  }
+
+  /* The shift ruling, drawn in CSS so the dark surface carries the motif even
+     where no SVG is present. */
+  .dusk-shifts {
+    background-image:
+      repeating-linear-gradient(to right, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 88px);
+  }
+
+  .dusk-hours {
+    background-image:
+      repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 28px);
+  }
+
+  /* An eyebrow earns its place by pointing at something. The short leading
+     rule does that and costs nothing; without it an uppercase label is just
+     decoration repeated on every panel. */
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[9.5px] font-semibold uppercase tracking-[0.2em] text-ink-faint;
+  }
+
+  .eyebrow::before {
+    content: '';
+    width: 14px;
+    height: 1px;
+    flex: none;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  .eyebrow-lit {
+    @apply inline-flex items-center gap-2 text-[9.5px] font-semibold uppercase tracking-[0.2em] text-dusk-faint;
+  }
+
+  .eyebrow-lit::before {
+    content: '';
+    width: 14px;
+    height: 1px;
+    flex: none;
+    background: currentColor;
+    opacity: 0.5;
+  }
+
+  /* A rule under a section heading, the way a printed report sets one. */
+  .rule-under {
+    @apply border-b border-line pb-4;
+  }
+
+  .xscroll {
+    @apply overflow-x-auto;
+    scrollbar-width: thin;
+    scrollbar-color: #c4b0be transparent;
+  }
+
+  .xscroll::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  .xscroll::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-line-strong;
+  }
+
+  .xscroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* Page load arrives in order rather than all at once, so the eye is walked
+     down the page instead of being handed all of it at the same moment. */
+  .stagger > * {
+    @apply animate-rise;
+  }
+  .stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger > *:nth-child(2) { animation-delay: 60ms; }
+  .stagger > *:nth-child(3) { animation-delay: 120ms; }
+  .stagger > *:nth-child(4) { animation-delay: 180ms; }
+  .stagger > *:nth-child(5) { animation-delay: 240ms; }
+  .stagger > *:nth-child(6) { animation-delay: 300ms; }
+  .stagger > *:nth-child(7) { animation-delay: 350ms; }
+  .stagger > *:nth-child(8) { animation-delay: 400ms; }
+  .stagger > *:nth-child(9) { animation-delay: 440ms; }
+  .stagger > *:nth-child(n + 10) { animation-delay: 480ms; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+:focus-visible {
+  outline: 2px solid #6e2150;
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.dusk-ground :focus-visible {
+  outline-color: #c888a9;
+}
